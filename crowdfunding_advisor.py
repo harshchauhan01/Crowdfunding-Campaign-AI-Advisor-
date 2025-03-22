@@ -26,18 +26,18 @@ def format_prompt(message, custom_instructions=None):
 
 # Function to generate response using Mistral
 def Mistralfast(prompt, temperature=0.6, max_new_tokens=150, top_p=0.95, repetition_penalty=1.0):
-    c = t()
+    start_time = t()
     temperature = max(float(temperature), 1e-2)
     top_p = float(top_p)
 
-    generate_kwargs = dict(
-        temperature=temperature,
-        max_new_tokens=max_new_tokens,
-        top_p=top_p,
-        repetition_penalty=repetition_penalty,
-        do_sample=True,
-        seed=random.randint(0, 10**7),
-    )
+    generate_kwargs = {
+        "temperature": temperature,
+        "max_new_tokens": max_new_tokens,
+        "top_p": top_p,
+        "repetition_penalty": repetition_penalty,
+        "do_sample": True,
+        "seed": random.randint(0, 10**7),
+    }
 
     custom_instructions = str(messages)
     formatted_prompt = format_prompt(prompt, custom_instructions)
@@ -58,7 +58,7 @@ def crowdfunding_advisor():
     st.markdown("<h1 style='text-align: center; color: #2E86C1;'>🚀 Laila: Your Crowdfunding Strategist</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #5D6D7E;'>Let’s craft a winning campaign together—step by step!</p>", unsafe_allow_html=True)
 
-    # Sidebar for navigation and extras
+    # Sidebar
     with st.sidebar:
         st.header("Navigation")
         st.info("Answer the questions below to build your campaign. Ask me anything in the chat!")
@@ -68,7 +68,7 @@ def crowdfunding_advisor():
         st.write("- Know your audience.")
         st.write("- Keep rewards exciting!")
 
-    # Initialize session state for campaign data
+    # Initialize session state
     if "campaign_data" not in st.session_state:
         st.session_state.campaign_data = {}
     if "chat_history" not in st.session_state:
@@ -80,39 +80,51 @@ def crowdfunding_advisor():
     with col1:
         st.subheader("Campaign Builder")
         with st.form(key="campaign_form"):
-            # Question 1: Project Name
+            # Project Name
             project_name = st.text_input("What’s the name or type of your project? (e.g., product, film, charity)", key="project_name")
-            if project_name and not project_name.startswith('"') and not project_name.endswith('"'):
+            if project_name and not (project_name.startswith('"') and project_name.endswith('"')):
                 st.warning('Please enclose the project name in quotes, e.g., "Eco Gadget"')
                 project_name = None
 
-            # Question 2: Unique Feature
-            unique_feature = st.text_input(f"What makes {project_name or 'your project'} stand out or truly exciting?", key="unique_feature")
-            if unique_feature and not unique_feature.startswith('"') and not unique_feature.endswith('"'):
+            # Unique Feature
+            unique_feature = st.text_input(f"What makes {project_name or 'your project'} stand out?", key="unique_feature")
+            if unique_feature and not (unique_feature.startswith('"') and unique_feature.endswith('"')):
                 st.warning('Please enclose the unique feature in quotes, e.g., "sustainable design"')
                 unique_feature = None
 
-            # Question 3: Funding Goal
-            funding_goal = st.text_input("How much funding are you targeting? (e.g., $10,000)", key="funding_goal")
+            # Funding Goal (Integer only)
+            funding_goal = st.text_input("How much funding are you targeting? (e.g., $10000)", key="funding_goal")
+            funding_goal_clean = funding_goal.replace('$', '').strip() if funding_goal else ""
+            if funding_goal and not funding_goal_clean.isdigit():
+                st.warning("Funding goal must be an integer (e.g., $10000)")
+                funding_goal = None
+            else:
+                funding_goal = f"${funding_goal_clean}" if funding_goal_clean else None
 
-            # Question 4: Target Audience
-            target_audience = st.text_input(f"Who will love {project_name or 'your project'}? (e.g., tech fans, parents)", key="target_audience")
-            if target_audience and not target_audience.startswith('"') and not target_audience.endswith('"'):
+            # Target Audience
+            target_audience = st.text_input(f"Who will love {project_name or 'your project'}? (e.g., tech fans)", key="target_audience")
+            if target_audience and not (target_audience.startswith('"') and target_audience.endswith('"')):
                 st.warning('Please enclose the target audience in quotes, e.g., "tech enthusiasts"')
                 target_audience = None
 
-            # Question 5: Campaign Duration
-            duration = st.text_input("How long do you plan to run this campaign? (e.g., 30 days)", key="duration")
+            # Campaign Duration (Integer only)
+            duration = st.text_input("How long will your campaign run? (e.g., 30 days)", key="duration")
+            duration_clean = duration.replace(' days', '').strip() if duration else ""
+            if duration and not duration_clean.isdigit():
+                st.warning("Duration must be an integer (e.g., 30 days)")
+                duration = None
+            else:
+                duration = f"{duration_clean} days" if duration_clean else None
 
-            # Question 6: Project Category
-            category = st.text_input(f"What category fits {project_name or 'your project'} best? (e.g., tech, art)", key="category")
-            if category and not category.startswith('"') and not category.endswith('"'):
+            # Project Category
+            category = st.text_input(f"What category fits {project_name or 'your project'}? (e.g., tech)", key="category")
+            if category and not (category.startswith('"') and category.endswith('"')):
                 st.warning('Please enclose the category in quotes, e.g., "technology"')
                 category = None
 
             submit_button = st.form_submit_button(label="Generate Strategy")
 
-        if submit_button and project_name and unique_feature and funding_goal and target_audience and duration and category:
+        if submit_button and all([project_name, unique_feature, funding_goal, target_audience, duration, category]):
             st.session_state.campaign_data = {
                 "Project Name": project_name,
                 "Unique Feature": unique_feature,
@@ -131,12 +143,8 @@ def crowdfunding_advisor():
             st.session_state.chat_history.append({"role": "You", "content": user_question})
             st.session_state.chat_history.append({"role": "Laila", "content": response})
 
-        # Display chat history
         for chat in st.session_state.chat_history:
-            if chat["role"] == "You":
-                st.markdown(f"**You:** {chat['content']}")
-            else:
-                st.markdown(f"**Laila:** {chat['content']}")
+            st.markdown(f"**{chat['role']}:** {chat['content']}")
 
 # Function to generate and display the strategy
 def generate_strategy(data):
@@ -149,20 +157,16 @@ def generate_strategy(data):
     st.write(f"**1. Pitch:** {pitch_advice} This will captivate your backers!")
 
     # Funding Goal and Budget
-    try:
-        goal = float(data["Funding Goal"].replace('$', '').replace(',', ''))
-        if goal < 5000:
-            funding_tip = "A modest goal—aim to secure 30% in the first week for momentum."
-            budget = f"Budget: 60% production (${goal * 0.6:,.0f}), 30% marketing (${goal * 0.3:,.0f}), 10% fees (${goal * 0.1:,.0f})."
-        elif goal > 50000:
-            funding_tip = "Ambitious vision! Build a pre-launch community of 500+ supporters."
-            budget = f"Budget: 50% production (${goal * 0.5:,.0f}), 35% marketing (${goal * 0.35:,.0f}), 15% fees (${goal * 0.15:,.0f})."
-        else:
-            funding_tip = "Strong target—push for 20-30% from your network in 48 hours."
-            budget = f"Budget: 55% production (${goal * 0.55:,.0f}), 35% marketing (${goal * 0.35:,.0f}), 10% fees (${goal * 0.1:,.0f})."
-    except ValueError:
-        funding_tip = "Let’s set a clear number next time—keep it realistic!"
-        budget = "Budget: Plan for ~55% production, 35% marketing, 10% fees once goal is set."
+    goal = int(data["Funding Goal"].replace('$', ''))
+    if goal < 5000:
+        funding_tip = "A modest goal—aim to secure 30% in the first week for momentum."
+        budget = f"Budget: 60% production (${goal * 0.6:,.0f}), 30% marketing (${goal * 0.3:,.0f}), 10% fees (${goal * 0.1:,.0f})."
+    elif goal > 50000:
+        funding_tip = "Ambitious vision! Build a pre-launch community of 500+ supporters."
+        budget = f"Budget: 50% production (${goal * 0.5:,.0f}), 35% marketing (${goal * 0.35:,.0f}), 15% fees (${goal * 0.15:,.0f})."
+    else:
+        funding_tip = "Strong target—push for 20-30% from your network in 48 hours."
+        budget = f"Budget: 55% production (${goal * 0.55:,.0f}), 35% marketing (${goal * 0.35:,.0f}), 10% fees (${goal * 0.1:,.0f})."
     st.write(f"**2. Funding Goal:** {funding_tip}  \n   {budget}")
 
     # Audience
@@ -176,16 +180,13 @@ def generate_strategy(data):
     st.write(f"**4. Rewards:** {reward_advice} These will seal the deal.")
 
     # Duration
-    try:
-        days = int(data["Duration"].replace(' days', '').strip())
-        if days < 20:
-            duration_tip = "Short and sharp—hit the ground running with full energy."
-        elif days > 45:
-            duration_tip = "A longer run—keep engagement high with updates every 3-5 days."
-        else:
-            duration_tip = "Ideal timing—focus efforts on days 1-7 and the final 48 hours."
-    except ValueError:
-        duration_tip = "Aim for 30-45 days for a balanced campaign."
+    days = int(data["Duration"].replace(' days', ''))
+    if days < 20:
+        duration_tip = "Short and sharp—hit the ground running with full energy."
+    elif days > 45:
+        duration_tip = "A longer run—keep engagement high with updates every 3-5 days."
+    else:
+        duration_tip = "Ideal timing—focus efforts on days 1-7 and the final 48 hours."
     st.write(f"**5. Duration:** {duration_tip}")
 
     # Pre-Launch Checklist
