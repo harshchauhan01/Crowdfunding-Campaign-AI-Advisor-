@@ -76,12 +76,12 @@ def crowdfunding_advisor():
         
         st.markdown("""
         **Aman Prakash** (Reg: 12318533)  
-        [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/aman-prakash/)
+        [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/amanprakash1009/)
         """)
         
         st.markdown("""
         **Pagidipale Yashwanth Reddy** (Reg: 12302404)  
-        [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yash/)
+        [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yash1154)
         """)
 
     # Initialize session state
