@@ -3,11 +3,10 @@ from huggingface_hub import InferenceClient
 import random
 from time import time as t
 
-# API Configuration
 API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
 headers = {"Authorization": "Bearer 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"}  # Replace with your API key
 
-# Base system messages for Laila
+
 messages = [
     {"role": "system", "content": "You are a crowdfunding advisor designed by Harsh Chauhan."},
     {"role": "system", "content": "Your name is Laila, and you guide users like a trusted, professional friend."},
@@ -52,7 +51,6 @@ def Mistralfast(prompt, temperature=0.6, max_new_tokens=150, top_p=0.95, repetit
     messages.append({"role": "assistant", "content": response})
     return response
 
-# Streamlit GUI for Crowdfunding Advisor
 def crowdfunding_advisor():
     st.set_page_config(page_title="Laila - Crowdfunding Advisor", page_icon="🚀", layout="wide")
     st.markdown("<h1 style='text-align: center; color: #2E86C1;'>🚀 Laila: Your Crowdfunding Strategist</h1>", unsafe_allow_html=True)
@@ -67,6 +65,24 @@ def crowdfunding_advisor():
         st.write("- Be specific with your goals.")
         st.write("- Know your audience.")
         st.write("- Keep rewards exciting!")
+
+        st.markdown("---")
+        st.subheader("Developers")
+        
+        st.markdown("""
+        **Harsh Chauhan** (Reg: 12319734)  
+        [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/harshchauhan7534/)
+        """)
+        
+        st.markdown("""
+        **Aman Prakash** (Reg: 12318533)  
+        [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/aman-prakash/)
+        """)
+        
+        st.markdown("""
+        **Pagidipale Yashwanth Reddy** (Reg: 12302404)  
+        [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yash/)
+        """)
 
     # Initialize session state
     if "campaign_data" not in st.session_state:
