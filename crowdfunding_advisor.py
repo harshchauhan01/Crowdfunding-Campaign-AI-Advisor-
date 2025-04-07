@@ -4,7 +4,7 @@ import random
 from time import time as t
 
 API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
-headers = {"Authorization": "Bearer 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"}  # Replace with your API key
+headers = {"Authorization": "Bearer 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"} 
 
 
 messages = [
@@ -15,7 +15,6 @@ messages = [
     {"role": "system", "content": "You’re an expert in crowdfunding, here to plan campaigns step-by-step, but can assist with any question."}
 ]
 
-# Function to format prompt
 def format_prompt(message, custom_instructions=None):
     prompt = ""
     if custom_instructions:
@@ -23,7 +22,6 @@ def format_prompt(message, custom_instructions=None):
     prompt += f"[INST] {message} [/INST]"
     return prompt
 
-# Function to generate response using Mistral
 def Mistralfast(prompt, temperature=0.6, max_new_tokens=150, top_p=0.95, repetition_penalty=1.0):
     start_time = t()
     temperature = max(float(temperature), 1e-2)
@@ -56,7 +54,7 @@ def crowdfunding_advisor():
     st.markdown("<h1 style='text-align: center; color: #2E86C1;'>🚀 Laila: Your Crowdfunding Strategist</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #5D6D7E;'>Let’s craft a winning campaign together—step by step!</p>", unsafe_allow_html=True)
 
-    # Sidebar
+
     with st.sidebar:
         st.header("Navigation")
         st.info("Answer the questions below to build your campaign. Ask me anything in the chat!")
@@ -84,31 +82,31 @@ def crowdfunding_advisor():
         [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/yash1154)
         """)
 
-    # Initialize session state
+    
     if "campaign_data" not in st.session_state:
         st.session_state.campaign_data = {}
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Main content
+    
     col1, col2 = st.columns([2, 1])
 
     with col1:
         st.subheader("Campaign Builder")
         with st.form(key="campaign_form"):
-            # Project Name
+            
             project_name = st.text_input("What’s the name or type of your project? (e.g., product, film, charity)", key="project_name")
             if project_name and not (project_name.startswith('"') and project_name.endswith('"')):
                 st.warning('Please enclose the project name in quotes, e.g., "Eco Gadget"')
                 project_name = None
 
-            # Unique Feature
+            
             unique_feature = st.text_input(f"What makes {project_name or 'your project'} stand out?", key="unique_feature")
             if unique_feature and not (unique_feature.startswith('"') and unique_feature.endswith('"')):
                 st.warning('Please enclose the unique feature in quotes, e.g., "sustainable design"')
                 unique_feature = None
 
-            # Funding Goal (Integer only)
+            
             funding_goal = st.text_input("How much funding are you targeting? (e.g., $10000)", key="funding_goal")
             funding_goal_clean = funding_goal.replace('$', '').strip() if funding_goal else ""
             if funding_goal and not funding_goal_clean.isdigit():
@@ -117,13 +115,13 @@ def crowdfunding_advisor():
             else:
                 funding_goal = f"${funding_goal_clean}" if funding_goal_clean else None
 
-            # Target Audience
+            
             target_audience = st.text_input(f"Who will love {project_name or 'your project'}? (e.g., tech fans)", key="target_audience")
             if target_audience and not (target_audience.startswith('"') and target_audience.endswith('"')):
                 st.warning('Please enclose the target audience in quotes, e.g., "tech enthusiasts"')
                 target_audience = None
 
-            # Campaign Duration (Integer only)
+            
             duration = st.text_input("How long will your campaign run? (e.g., 30 days)", key="duration")
             duration_clean = duration.replace(' days', '').strip() if duration else ""
             if duration and not duration_clean.isdigit():
@@ -132,7 +130,7 @@ def crowdfunding_advisor():
             else:
                 duration = f"{duration_clean} days" if duration_clean else None
 
-            # Project Category
+            
             category = st.text_input(f"What category fits {project_name or 'your project'}? (e.g., tech)", key="category")
             if category and not (category.startswith('"') and category.endswith('"')):
                 st.warning('Please enclose the category in quotes, e.g., "technology"')
@@ -162,17 +160,17 @@ def crowdfunding_advisor():
         for chat in st.session_state.chat_history:
             st.markdown(f"**{chat['role']}:** {chat['content']}")
 
-# Function to generate and display the strategy
+
 def generate_strategy(data):
     st.markdown("---")
     st.subheader(f"Laila’s Strategy for {data['Project Name']}")
 
-    # Pitch
+    
     pitch_prompt = f"Suggest how to pitch {data['Unique Feature']} to make it compelling for a crowdfunding campaign."
     pitch_advice = Mistralfast(pitch_prompt)
     st.write(f"**1. Pitch:** {pitch_advice} This will captivate your backers!")
 
-    # Funding Goal and Budget
+    
     goal = int(data["Funding Goal"].replace('$', ''))
     if goal < 5000:
         funding_tip = "A modest goal—aim to secure 30% in the first week for momentum."
@@ -185,17 +183,17 @@ def generate_strategy(data):
         budget = f"Budget: 55% production (${goal * 0.55:,.0f}), 35% marketing (${goal * 0.35:,.0f}), 10% fees (${goal * 0.1:,.0f})."
     st.write(f"**2. Funding Goal:** {funding_tip}  \n   {budget}")
 
-    # Audience
+    
     audience_prompt = f"Suggest the best way to reach and engage {data['Target Audience']} for a crowdfunding campaign."
     audience_advice = Mistralfast(audience_prompt)
     st.write(f"**3. Audience:** {audience_advice} Time to rally your crowd!")
 
-    # Rewards
+    
     reward_prompt = f"Suggest three creative reward ideas for a crowdfunding campaign in the {data['Category']} category."
     reward_advice = Mistralfast(reward_prompt)
     st.write(f"**4. Rewards:** {reward_advice} These will seal the deal.")
 
-    # Duration
+    
     days = int(data["Duration"].replace(' days', ''))
     if days < 20:
         duration_tip = "Short and sharp—hit the ground running with full energy."
@@ -205,17 +203,17 @@ def generate_strategy(data):
         duration_tip = "Ideal timing—focus efforts on days 1-7 and the final 48 hours."
     st.write(f"**5. Duration:** {duration_tip}")
 
-    # Pre-Launch Checklist
+    
     st.write("**6. Pre-Launch Checklist:**")
     st.write("- Build an email list of 100+ supporters.")
     st.write("- Create a 2-3 min video (hook in 10 sec).")
     st.write("- Tease it on social media 1-2 weeks prior.")
 
-    # Summary
+    
     st.markdown(f"**Campaign Summary:** {data['Project Name']} | Goal: {data['Funding Goal']} | Audience: {data['Target Audience']}")
     st.success("Let’s make this a success—any questions before we kick off?")
 
-# Run the app
+
 if __name__ == "__main__":
     if headers["Authorization"] == "Bearer YOUR_API_KEY_HERE":
         st.error("Please update 'YOUR_API_KEY_HERE' with your Hugging Face API key. Get it at: https://huggingface.co/settings/tokens")
